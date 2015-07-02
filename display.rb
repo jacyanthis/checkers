@@ -14,8 +14,8 @@ class Display
 
   def game_over_message
     render
-    if board.checkmate?(game.current_color)
-      puts "Checkmate, #{board.opponent_color(current_color)} wins."
+    if board.winner?
+      puts "Game over, #{board.opposite_color(game.current_color)} wins."
     else
       puts "It's a stalemate!"
     end
@@ -40,18 +40,18 @@ class Display
   end
 
   def render(first_pos = nil)
-    system("clear")
+    # system("clear")
     if first_pos.nil?
       highlighted_positions = board[cursor].moves
     else
       highlighted_positions = board[first_pos].moves
     end
 
-    puts "  #{('A'..'H').to_a.join("  ")}"
+    puts "    #{('A'..'H').to_a.join("  ")}"
 
 
     (0...8).each do |row_idx|
-      print "#{row_idx + 1}"
+      print " #{row_idx + 1} "
       (0...8).each do |col_idx|
         if cursor == [row_idx, col_idx]
           print board[[row_idx, col_idx]].to_s.colorize(:background => :light_green)
@@ -60,12 +60,12 @@ class Display
         elsif (row_idx + col_idx).even?
           print board[[row_idx, col_idx]].to_s.colorize(:background => :white)
         else
-          print board[[row_idx, col_idx]].to_s.colorize(:background => :light_blue)
+          print board[[row_idx, col_idx]].to_s.colorize(:background => :black)
         end
       end
 
       if row_idx == 0
-        print find_captured(:black)
+        print find_captured(:white)
       elsif row_idx == 7
         print find_captured(:red)
       end
@@ -100,7 +100,7 @@ class Display
         return cursor.dup if move_type == :next_jump &&
                               board[first_pos].moves.include?(cursor)
       elsif command == :"\"s\""
-        raise "saving not implemented yet!"
+        game.save
       elsif command == :"\"q\""
         exit 0
       elsif command == :"\"u\""

@@ -1,5 +1,6 @@
 require_relative 'display'
 require_relative 'player'
+require 'yaml'
 
 class Game
   attr_accessor :board, :display, :players
@@ -23,11 +24,11 @@ class Game
     mode = gets.chomp
     case mode
     when "1"
-      [Human.new(self, display, :black), Human.new(self, display, :red)]
+      [Human.new(self, display, :white), Human.new(self, display, :red)]
     when "2"
-      [Human.new(self, display, :black), Computer.new(self, display, :red)]
+      [Human.new(self, display, :white), Computer.new(self, display, :red)]
     when "3"
-      [Computer.new(self, display, :black), Computer.new(self, display, :red)]
+      [Computer.new(self, display, :white), Computer.new(self, display, :red)]
     when "4"
       Game.load_file
     end
@@ -61,8 +62,8 @@ class Game
     board.execute_move(move)
   end
 
-  def get_next_jump(jump_pos)
-    current_player.get_next_jump(jump_pos)
+  def get_next_jump(duped_board, jump_pos)
+    current_player.get_next_jump(duped_board, jump_pos)
   end
 
   def switch_turn

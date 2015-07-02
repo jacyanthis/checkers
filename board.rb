@@ -29,7 +29,7 @@ class Board
   def populate_board
     army_rows.times do |row|
       populate_row(row, row.even?, :red)
-      populate_row(size - 1 - row, row.odd?, :black)
+      populate_row(size - 1 - row, row.odd?, :white)
     end
   end
 
@@ -42,20 +42,29 @@ class Board
   end
 
   def execute_move(move)
+    # puts "my move is: #{move}"
     start, finish = move
     is_jump = (start[0] - finish[0]).abs == 2
+
+    # puts "i'm moving from #{start} to #{finish} and i am a #{self[start].class}"
 
     self[finish] = self[start].move(finish)
     self[start] = @sentinel
 
+    # puts "now that i moved, i'm a #{self[finish].class}"
+
     if is_jump
+      # puts "in the is_jump conditional, i am a #{self[finish].class} and my jumping ability is: #{self[finish].can_jump?}"
       requires_double_jump = self[finish].can_jump?
       destroy([(finish[0] + start[0]) / 2, (finish[1] + start[1]) / 2])
       if requires_double_jump
-        new_landing = game.get_next_jump(finish)
-        puts "new landing is #{new_landing}"
-        puts "finish is #{finish}"
-        execute_move([finish, new_landing])
+        debugger
+        # puts "in the requires_double_jump conditional, i am a #{self[finish].class} and my jumping ability is: #{self[finish].can_jump?}"
+        new_jump = game.get_next_jump(self, finish)
+        # puts "new landing is #{new_jump}"
+        # puts "finish is #{finish}"
+        # puts "i am in the requires_double_jump conditional"
+        execute_move(new_jump)
       end
     end
   end
@@ -66,15 +75,25 @@ class Board
   end
 
   def over?
+    someone_won || tie
+  end
+
+  def someone_won
     @grid.flatten.none? { |piece| piece.color == :red } ||
-    @grid.flatten.none? { |piece| piece.color == :black }
+      @grid.flatten.none? { |piece| piece.color == :white }
+  end
+
+  def tie
+    all_valid_moves(:red).empty? || all_valid_moves(:white).empty?
   end
 
   def winner?
     if @grid.flatten.none? { |piece| piece.color == :red }
-      :black
-    else
+      :white
+    elsif @grid.flatten.none? { |piece| piece.color == :white }
       :red
+    else
+      nil
     end
   end
 
@@ -95,6 +114,42 @@ class Board
   end
 
   def opposite_color(color)
-    color == :red ? :black : :red
+    color == :red ? :white : :red
+  end
+
+  def deep_dup_board
+    new_board = Board.new(game)
+    new_grid = deep_dup_grid(grid, new_board)
+    new_board.grid = new_grid
+    new_board
+  end
+
+  def deep_dup_array(array, new_board)
+    array.map do |piece|
+      piece.deep_dup(new_board)
+    end
+  end
+
+  def deep_dup_grid(array, new_board)
+    return deep_dup_array(array, new_board) if array.none? {|el| el.is_a?(Array) }
+    array.map {|el| deep_dup_grid(el, new_board)}
+  end
+
+  def all_valid_moves(color)
+    all_pieces = grid.flatten.select do |piece|
+      piece.color == color
+    end
+
+    all_pieces.map do |piece|
+      piece.moves.map do |move|
+        [piece.pos, move]
+      end
+    end.flatten(1)
+  end
+
+  def all_valid_jumps(pos)
+    self[pos].find_jumps.map do |jump|
+      [pos, jump]
+    end
   end
 end

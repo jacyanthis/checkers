@@ -4,6 +4,10 @@ class EmptySpace
     "   "
   end
 
+  def deep_dup(new_board)
+    self
+  end
+
   def occupied?
     false
   end
@@ -13,6 +17,10 @@ class EmptySpace
   end
 
   def moves
+    []
+  end
+
+  def find_jumps
     []
   end
 

@@ -32,12 +32,12 @@ def show_single_key
     :left
   when "\r"
     :return
+  when "\u0003"
+    puts "CONTROL-C"
+    raise Interrupt
   when /^.$/
     p c.inspect.to_sym
     c.inspect.to_sym
-  when "\u0003"
-    puts "CONTROL-C"
-    exit 0
   else
     puts "SOMETHING ELSE: #{c.inspect}"
   end
