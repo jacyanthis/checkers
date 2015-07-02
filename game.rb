@@ -4,31 +4,39 @@ require_relative 'player'
 class Game
   attr_accessor :board, :display, :players
 
-  def self.pick_mode
-    system 'clear'
-    puts "Select your mode from the following:"
-    puts "1 - Player vs. Player"
-    puts "2 - Player vs. Computer"
-    puts "3 - Computer vs. Computer"
+  def self.load_file
+    puts "Which file would you like to load?"
+    filename = gets.chomp
+    loaded_game = File.open(filename, "r") { |f| YAML::load(f) }
+    loaded_game.run
+  end
+
+  def initialize
+    @board = Board.new(self)
+    @display = Display.new(board, self)
+    @players = pick_mode
+    run
+  end
+
+  def pick_mode
+    display.display_modes
     mode = gets.chomp
     case mode
     when "1"
-      Game.new(:human, :human).run
+      [Human.new(self, display, :black), Human.new(self, display, :red)]
     when "2"
-      Game.new(:human, :computer).run
+      [Human.new(self, display, :black), Computer.new(self, display, :red)]
     when "3"
-      Game.new(:computer, :computer).run
+      [Computer.new(self, display, :black), Computer.new(self, display, :red)]
+    when "4"
+      Game.load_file
     end
   end
 
-  def initialize(player1_sym, player2_sym)
-    @board = Board.new(self)
-    @display = Display.new(board, self)
-    @players = [make_player(player1_sym, :black), make_player(player2_sym, :red)]
-  end
-
-  def make_player(player, color)
-    player == :human ? Human.new(self, display, color) : Computer.new(self, display, color)
+  def save
+    puts "What filename would you like to use for this save?"
+    filename = gets.chomp
+    File.open(filename, "w") { |f| f.write(self.to_yaml) }
   end
 
   def current_player
@@ -41,7 +49,7 @@ class Game
 
   def run
     turn until game_over?
-    game_over_message
+    display.game_over_message
   end
 
   def turn
@@ -64,11 +72,6 @@ class Game
   def game_over?
     board.over?
   end
-
-  def game_over_message
-    puts "Congratulations, #{board.winner}. You're the winner!"
-  end
-
 end
 
-Game.new(:human, :human).run
+Game.new

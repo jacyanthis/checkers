@@ -4,25 +4,48 @@ require "colorize"
 
 
 class Display
-  attr_accessor :pos, :board, :game
+  attr_accessor :cursor, :board, :game
 
   def initialize(board, game)
     @board = board
-    @pos = [0, 0]
+    @cursor = [0, 0]
     @game = game
+  end
+
+  def game_over_message
+    render
+    if board.checkmate?(game.current_color)
+      puts "Checkmate, #{board.opponent_color(current_color)} wins."
+    else
+      puts "It's a stalemate!"
+    end
+  end
+
+  def display_modes
+    system 'clear'
+    puts "Select your mode from the following:"
+    puts "1 - Player vs. Player"
+    puts "2 - Player vs. Computer"
+    puts "3 - Computer vs. Computer"
+    puts "4 - Load a game"
   end
 
   def find_captured(color)
     result = ""
-    board.captured_pieces.select{ |piece| piece.color == color}.each do |piece|
+    board.captured_pieces.select { |piece| piece.color == color}.each do |piece|
       result += piece.to_s
     end
 
     result
   end
 
-  def render
+  def render(first_pos = nil)
     system("clear")
+    if first_pos.nil?
+      highlighted_positions = board[cursor].moves
+    else
+      highlighted_positions = board[first_pos].moves
+    end
 
     puts "  #{('A'..'H').to_a.join("  ")}"
 
@@ -30,14 +53,10 @@ class Display
     (0...8).each do |row_idx|
       print "#{row_idx + 1}"
       (0...8).each do |col_idx|
-        if pos == [row_idx, col_idx]
+        if cursor == [row_idx, col_idx]
           print board[[row_idx, col_idx]].to_s.colorize(:background => :light_green)
-        elsif board[pos].moves.include?([row_idx, col_idx])
-          if board[[row_idx, col_idx]].occupied?
-            print board[[row_idx, col_idx]].to_s.colorize(:background => :yellow)
-          else
-            print board[[row_idx, col_idx]].to_s.colorize(:background => :cyan)
-          end
+        elsif highlighted_positions.include?([row_idx, col_idx])
+          print board[[row_idx, col_idx]].to_s.colorize(:background => :cyan)
         elsif (row_idx + col_idx).even?
           print board[[row_idx, col_idx]].to_s.colorize(:background => :white)
         else
@@ -56,17 +75,17 @@ class Display
 
   def cursor_loop(move_type, first_pos = nil)
     loop do
-      render
+      render(first_pos)
       # puts "i am in a new cursor loop"
 
       if move_type == :pick
         puts "Please select a piece to move, #{game.current_color}."
         puts
       elsif move_type == :place
-        puts "Please select a location to move the piece from #{first_pos}"
-        puts "You can move it to any of these locations: #{board[first_pos].moves}"
+        puts "Please select a location to move that piece."
+        puts "You can under your piece selection by pressing 'u'."
       elsif move_type == :next_jump
-        puts "You must jump again! Please select a landing position from #{board[first_pos].moves}."
+        puts "You must jump again! Please select a landing position."
       end
       puts ""
       puts "Please use the arrow keys to select a position."
@@ -74,22 +93,26 @@ class Display
       puts "Press 's' to save or 'q' to quit."
       command = show_single_key
       if command == :return
-        return pos.dup if move_type == :pick && board[pos].color == game.current_color
-        return pos.dup if move_type == :place && board[first_pos].moves.include?(pos)
-        return pos.dup if move_type == :next_jump && board[first_pos].moves.include?(pos)
+        return cursor.dup if move_type == :pick &&
+                              board[cursor].color == game.current_color
+        return cursor.dup if move_type == :place &&
+                              board[first_pos].moves.include?(cursor)
+        return cursor.dup if move_type == :next_jump &&
+                              board[first_pos].moves.include?(cursor)
       elsif command == :"\"s\""
-        offer_save
-        break
+        raise "saving not implemented yet!"
       elsif command == :"\"q\""
         exit 0
-      elsif command == :up && board.on_board?([pos[0] - 1, pos[1]])
-        self.pos[0] -= 1
-      elsif command == :down && board.on_board?([pos[0] + 1, pos[1]])
-        self.pos[0] += 1
-      elsif command == :left && board.on_board?([pos[0], pos[1] - 1])
-        self.pos[1] -= 1
-      elsif command == :right && board.on_board?([pos[0], pos[1] + 1])
-        self.pos[1] += 1
+      elsif command == :"\"u\""
+        raise ResetError.new
+      elsif command == :up && board.on_board?([cursor[0] - 1, cursor[1]])
+        self.cursor[0] -= 1
+      elsif command == :down && board.on_board?([cursor[0] + 1, cursor[1]])
+        self.cursor[0] += 1
+      elsif command == :left && board.on_board?([cursor[0], cursor[1] - 1])
+        self.cursor[1] -= 1
+      elsif command == :right && board.on_board?([cursor[0], cursor[1] + 1])
+        self.cursor[1] += 1
       end
     end
   end

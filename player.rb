@@ -10,8 +10,12 @@ end
 
 class Human < Player
   def get_move
-    first_move = display.cursor_loop(:pick)
-    second_move = display.cursor_loop(:place, first_move)
+    begin
+      first_move = display.cursor_loop(:pick)
+      second_move = display.cursor_loop(:place, first_move)
+    rescue ResetError => u
+      retry
+    end
     game.execute_move([first_move, second_move])
   end
 
@@ -22,4 +26,7 @@ end
 
 class Computer < Player
 
+end
+
+class ResetError < StandardError
 end

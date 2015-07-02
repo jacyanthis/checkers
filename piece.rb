@@ -22,8 +22,13 @@ class Piece
 
   def move(new_pos)
     self.pos = new_pos
+    update_kinged
 
     self
+  end
+
+  def update_kinged
+    self.kinged = true if (pos[0] == 0 && color == :black) || (pos[0] == 7 && color == :red)
   end
 
   def can_jump?
@@ -81,46 +86,11 @@ class Piece
     end
   end
 
-  # def find_jumps
-  #   if kinged
-  #     find_jumps_of_color(:red, pos) + find_jumps_of_color(:black, pos)
-  #   elsif color == :red
-  #     find_jumps_of_color(:red, pos)
-  #   elsif color == :black
-  #     find_jumps_of_color(:black, pos)
-  #   end
-  # end
-  #
-  # def find_jumps_of_color(color, previous_jump, first_jump = true)
-  #
-  #   potential_new_jumps = single_jumps(color, previous_jump)
-  #
-  #   valid_new_jumps = potential_new_jumps.select do |jump|
-  #     next false if !board.on_board?(jump)
-  #     midpoint = find_midpoint(previous_jump, jump)
-  #     board.enemy?(midpoint, color) && !board.occupied?(jump)
-  #   end
-  #
-  #   if valid_new_jumps.empty?
-  #     if first_jump
-  #       return []
-  #     else
-  #       return [previous_jump]
-  #     end
-  #   end
-  #
-  #   valid_new_jumps.map do |jump|
-  #     find_jumps_of_color(color, jump, false)
-  #   end.flatten(1)
-  # end
 
   def find_midpoint(pos1, pos2)
     [(pos1[0] + pos2[0]) / 2, (pos1[1] + pos2[1]) / 2]
   end
 
-  # def single_jumps(color, start_pos)
-  #   color == :red ? single_red_jumps(start_pos) : single_black_jumps(start_pos)
-  # end
 
   def single_red_jumps(start_pos)
     [[start_pos[0] + 2, start_pos[1] + 2], [start_pos[0] + 2, start_pos[1] - 2]]
