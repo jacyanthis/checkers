@@ -42,7 +42,7 @@ class Board
   end
 
   def execute_move(move)
-    puts "i am the board, executing the move: #{move}"
+    # puts "i am the board, executing the move: #{move}"
     start, finish = move
     is_jump = (start[0] - finish[0]).abs == 2
 
@@ -151,5 +151,26 @@ class Board
     self[pos].find_jumps.map do |jump|
       [pos, jump]
     end
+  end
+
+
+
+
+  def special_render
+
+      puts "    #{('A'..'H').to_a.join("  ")}"
+
+
+      (0...8).each do |row_idx|
+        print " #{row_idx + 1} "
+        (0...8).each do |col_idx|
+          if (row_idx + col_idx).even?
+            print self[[row_idx, col_idx]].to_s.colorize(:background => :white)
+          else
+            print self[[row_idx, col_idx]].to_s.colorize(:background => :black)
+          end
+        end
+        puts
+      end
   end
 end
