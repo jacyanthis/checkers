@@ -40,6 +40,7 @@ class Piece
   end
 
   def can_jump?
+    puts "in can_jump?, my jumps are #{find_jumps}"
     !find_jumps.empty?
   end
 
@@ -89,17 +90,17 @@ class Piece
     end
   end
 
-  def find_jumps_of_color(color)
-    single_jumps(pos, color).select do |jump|
+  def find_jumps_of_color(jump_color)
+    single_jumps(pos, jump_color).select do |jump|
       midpoint = find_midpoint(pos, jump)
       board.on_board?(jump) && board.enemy?(midpoint, color) && !board.occupied?(jump)
     end
   end
 
-  def single_jumps(pos, color)
-    if color == :red
+  def single_jumps(pos, jump_color)
+    if jump_color == :red
       single_red_jumps(pos)
-    elsif color == :white
+    elsif jump_color == :white
       single_white_jumps(pos)
     end
   end

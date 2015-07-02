@@ -42,7 +42,7 @@ class Board
   end
 
   def execute_move(move)
-    # puts "my move is: #{move}"
+    puts "i am the board, executing the move: #{move}"
     start, finish = move
     is_jump = (start[0] - finish[0]).abs == 2
 
@@ -55,10 +55,10 @@ class Board
 
     if is_jump
       # puts "in the is_jump conditional, i am a #{self[finish].class} and my jumping ability is: #{self[finish].can_jump?}"
-      requires_double_jump = self[finish].can_jump?
       destroy([(finish[0] + start[0]) / 2, (finish[1] + start[1]) / 2])
+      requires_double_jump = self[finish].can_jump?
       if requires_double_jump
-        debugger
+        # debugger
         # puts "in the requires_double_jump conditional, i am a #{self[finish].class} and my jumping ability is: #{self[finish].can_jump?}"
         new_jump = game.get_next_jump(self, finish)
         # puts "new landing is #{new_jump}"

@@ -40,7 +40,7 @@ class Display
   end
 
   def render(first_pos = nil)
-    # system("clear")
+    system("clear")
     if first_pos.nil?
       highlighted_positions = board[cursor].moves
     else

@@ -20,7 +20,7 @@ class Human < Player
   end
 
   def get_next_jump(_, jump_pos)
-    display.cursor_loop(:next_jump, jump_pos)
+    [jump_pos, display.cursor_loop(:next_jump, jump_pos)]
   end
 end
 
@@ -30,7 +30,7 @@ class Computer < Player
   def initialize(game, display, color)
     super
     @next_jump = nil
-    @intelligence = 2
+    @intelligence = 1 #0-4 (gets slowed as intelligence increases)
   end
 
   def get_next_jump(duped_board, jump_pos)
@@ -48,8 +48,9 @@ class Computer < Player
   def get_move
     best_move = game.board.all_valid_moves(color).max_by do |move|
       duped_board = game.board.deep_dup_board
+      puts "my board's oid is: #{duped_board.object_id}"
       duped_board.execute_move(move)
-      display.render
+      # duped_board.special_render
       move_value = find_value(duped_board, :self, intelligence)
       puts "i am #{color} and my move #{move} has a value of: #{move_value}"
       move_value
