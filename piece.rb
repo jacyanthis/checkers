@@ -20,6 +20,10 @@ class Piece
     self.class.new(pos, new_board, color, kinged)
   end
 
+  def edge?
+    pos[0] == 0 || pos[0] == 7 || pos[1] == 0 || pos[1] == 7
+  end
+
   def occupied?
     true
   end

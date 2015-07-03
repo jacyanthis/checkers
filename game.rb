@@ -26,9 +26,9 @@ class Game
     when "1"
       [Human.new(self, display, :white), Human.new(self, display, :red)]
     when "2"
-      [Human.new(self, display, :white), Computer.new(self, display, :red, 2)]
+      [Human.new(self, display, :white), Computer.new(self, display, :red, 1, true)]
     when "3"
-      [Computer.new(self, display, :white, 0), Computer.new(self, display, :red, 2)]
+      [Computer.new(self, display, :white, 1, false), Computer.new(self, display, :red, 4, true)]
     when "4"
       Game.load_file
     end

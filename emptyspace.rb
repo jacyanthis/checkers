@@ -8,6 +8,10 @@ class EmptySpace
     self
   end
 
+  def edge?
+    false
+  end
+
   def occupied?
     false
   end
@@ -28,4 +32,7 @@ class EmptySpace
     :none
   end
 
+  def kinged
+    false
+  end
 end

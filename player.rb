@@ -25,12 +25,13 @@ class Human < Player
 end
 
 class Computer < Player
-  attr_accessor :next_jump, :intelligence
+  attr_accessor :next_jump, :intelligence, :special_sauce
 
-  def initialize(game, display, color, intelligence)
+  def initialize(game, display, color, intelligence, special_sauce)
     super(game, display, color)
     @next_jump = nil
     @intelligence = intelligence #0-4 (gets slowed as intelligence increases)
+    @special_sauce = special_sauce #uses an improved heuristic for valuing the board
   end
 
   def get_next_jump(duped_board, jump_pos)
@@ -48,15 +49,15 @@ class Computer < Player
   def get_move
     moves_with_values = game.board.all_valid_moves(color).map do |move|
       duped_board = game.board.deep_dup_board
-      puts "my board's oid is: #{duped_board.object_id}"
+      # puts "my board's oid is: #{duped_board.object_id}"
       duped_board.execute_move(move)
-      duped_board.special_render
-      puts "i am looking for the value of this move: #{move}"
-      move_value = find_value(duped_board, :self, intelligence)
-      puts "i am #{color} and my move #{move} has a value of: #{move_value}"
+      # duped_board.special_render
+      # puts "i am looking for the value of this move: #{move}"
+      move_value = find_value(duped_board, :opponent, intelligence)
+      # puts "i am #{color} and my move #{move} has a value of: #{move_value}"
       [move, move_value]
     end
-    puts "my moves with values are: #{moves_with_values}"
+    # puts "my moves with values are: #{moves_with_values}"
 
     best_move_with_value = moves_with_values.max_by { |move, value| value }
 
@@ -74,18 +75,17 @@ class Computer < Player
     # board_state.special_render
     # sleep(0.5)
     return direct_value(board_state) if depth == 0
-
     if player == :self
       values = potential_board_states(board_state, color).map do |state|
         find_value(state, :opponent, depth - 1)
       end
-      puts "my values for maxing are #{values}"
+      # puts "the current player is #{player} and they want to max these values: #{values}"
       values.empty? ? find_value(board_state, :opponent, depth - 1) : values.max
     else
       values = potential_board_states(board_state, game.board.opposite_color(color)).map do |state|
-        find_value(state, :self, depth - 1)
+        find_value(state, :self, 0)
       end
-      puts "my values for mining are: #{values}"
+      # puts "the current player is #{player} and they want to min these values: #{values}"
       values.empty? ? find_value(board_state, :opponent, depth - 1) : values.min
     end
   end
@@ -99,9 +99,28 @@ class Computer < Player
       piece.color == board_state.opposite_color(color)
     end.count
 
-    # puts "i think the value of my board is #{num_self_pieces - num_enemy_pieces}"
+    num_self_kings = board_state.grid.flatten.select do |piece|
+      piece.kinged == true && piece.color == color
+    end.count
 
-    num_self_pieces - num_enemy_pieces
+    num_enemy_kings = board_state.grid.flatten.select do |piece|
+      piece.kinged == true && piece.color == board_state.opposite_color(color)
+    end.count
+
+    num_self_edge = board_state.grid.flatten.select do |piece|
+      piece.edge? == true && piece.color == color
+    end.count
+
+    num_enemy_edge = board_state.grid.flatten.select do |piece|
+      piece.edge? == true && piece.color == board_state.opposite_color(color)
+    end.count
+
+    # puts "i think the value of my board is #{num_self_pieces - num_enemy_pieces}"
+    if special_sauce
+      num_self_pieces - num_enemy_pieces + (2 * num_self_kings) - (2 * num_enemy_kings) + (1.5 * num_self_edge) - (1.5 * num_enemy_edge)
+    else
+      num_self_pieces - num_enemy_pieces
+    end
   end
 
   def potential_board_states(board_state, color)
@@ -109,7 +128,7 @@ class Computer < Player
       duped_board = board_state.deep_dup_board
       duped_board.execute_move(move)
       duped_board
-    end || [board_state]
+    end
   end
 
 end
