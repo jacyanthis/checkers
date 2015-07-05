@@ -35,13 +35,10 @@ class Computer < Player
   end
 
   def get_next_jump(duped_board, jump_pos)
-    # puts "i am in the get_next_jump method"
-    # puts "my valid jumps are #{duped_board.all_valid_jumps(jump_pos)} using my #{game.board[jump_pos].class} at #{jump_pos}"
     duped_board.all_valid_jumps(jump_pos).max_by do |move|
       new_duped_board = duped_board.deep_dup_board
       new_duped_board.execute_move(move)
       move_value = direct_value(duped_board)
-      # puts "the move #{move} has a value of: #{move_value}"
       move_value
     end
   end
@@ -49,43 +46,31 @@ class Computer < Player
   def get_move
     moves_with_values = game.board.all_valid_moves(color).map do |move|
       duped_board = game.board.deep_dup_board
-      # puts "my board's oid is: #{duped_board.object_id}"
       duped_board.execute_move(move)
-      # duped_board.special_render
-      # puts "i am looking for the value of this move: #{move}"
       move_value = find_value(duped_board, :opponent, intelligence)
-      # puts "i am #{color} and my move #{move} has a value of: #{move_value}"
       [move, move_value]
     end
-    # puts "my moves with values are: #{moves_with_values}"
 
     best_move_with_value = moves_with_values.max_by { |move, value| value }
 
     best_pairs = moves_with_values.select { |move, value| value == best_move_with_value[1]}
 
     best_moves = best_pairs.map { |move, value| move }
-    # puts "my best move is #{best_move}"
     game.execute_move(best_moves.sample)
     display.render
   end
 
   def find_value(board_state, player, depth)
-    # puts "i am at depth #{depth} in the recursive call"
-    # puts "i am looking at this board:"
-    # board_state.special_render
-    # sleep(0.5)
     return direct_value(board_state) if depth == 0
     if player == :self
       values = potential_board_states(board_state, color).map do |state|
         find_value(state, :opponent, depth - 1)
       end
-      # puts "the current player is #{player} and they want to max these values: #{values}"
       values.empty? ? find_value(board_state, :opponent, depth - 1) : values.max
     else
       values = potential_board_states(board_state, game.board.opposite_color(color)).map do |state|
         find_value(state, :self, 0)
       end
-      # puts "the current player is #{player} and they want to min these values: #{values}"
       values.empty? ? find_value(board_state, :opponent, depth - 1) : values.min
     end
   end
@@ -115,7 +100,6 @@ class Computer < Player
       piece.edge? == true && piece.color == board_state.opposite_color(color)
     end.count
 
-    # puts "i think the value of my board is #{num_self_pieces - num_enemy_pieces}"
     if special_sauce
       num_self_pieces - num_enemy_pieces + (2 * num_self_kings) - (2 * num_enemy_kings) + (1.5 * num_self_edge) - (1.5 * num_enemy_edge)
     else

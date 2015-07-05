@@ -1,3 +1,6 @@
+#file edited from https://gist.github.com/acook/4190379
+#suggested by Ryan Glassett, App Academy instructor
+
 require 'io/console'
 
 def read_char

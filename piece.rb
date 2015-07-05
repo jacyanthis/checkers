@@ -44,7 +44,6 @@ class Piece
   end
 
   def can_jump?
-    # puts "in can_jump?, my jumps are #{find_jumps}"
     !find_jumps.empty?
   end
 

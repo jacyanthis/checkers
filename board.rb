@@ -42,28 +42,17 @@ class Board
   end
 
   def execute_move(move)
-    # puts "i am the board, executing the move: #{move}"
     start, finish = move
     is_jump = (start[0] - finish[0]).abs == 2
-
-    # puts "i'm moving from #{start} to #{finish} and i am a #{self[start].class}"
 
     self[finish] = self[start].move(finish)
     self[start] = @sentinel
 
-    # puts "now that i moved, i'm a #{self[finish].class}"
-
     if is_jump
-      # puts "in the is_jump conditional, i am a #{self[finish].class} and my jumping ability is: #{self[finish].can_jump?}"
       destroy([(finish[0] + start[0]) / 2, (finish[1] + start[1]) / 2])
       requires_double_jump = self[finish].can_jump?
       if requires_double_jump
-        # debugger
-        # puts "in the requires_double_jump conditional, i am a #{self[finish].class} and my jumping ability is: #{self[finish].can_jump?}"
         new_jump = game.get_next_jump(self, finish)
-        # puts "new landing is #{new_jump}"
-        # puts "finish is #{finish}"
-        # puts "i am in the requires_double_jump conditional"
         execute_move(new_jump)
       end
     end
@@ -92,8 +81,6 @@ class Board
       :white
     elsif @grid.flatten.none? { |piece| piece.color == :white }
       :red
-    else
-      nil
     end
   end
 
@@ -153,10 +140,10 @@ class Board
     end
   end
 
+  #special method for debugging minimax hypothetical board states
   # def special_render
   #
   #     puts "    #{('A'..'H').to_a.join("  ")}"
-  #
   #
   #     (0...8).each do |row_idx|
   #       print " #{row_idx + 1} "

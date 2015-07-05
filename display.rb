@@ -1,6 +1,6 @@
 require_relative 'board'
 require_relative 'cursor_input'
-require "colorize"
+require 'colorize'
 
 
 class Display
@@ -76,7 +76,6 @@ class Display
   def cursor_loop(move_type, first_pos = nil)
     loop do
       render(first_pos)
-      # puts "i am in a new cursor loop"
 
       if move_type == :pick
         puts "Please select a piece to move, #{game.current_color}."
@@ -86,6 +85,7 @@ class Display
         puts "You can under your piece selection by pressing 'u'."
       elsif move_type == :next_jump
         puts "You must jump again! Please select a landing position."
+        puts
       end
       puts ""
       puts "Please use the arrow keys to select a position."
